@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { account, databases, getUserByEmail, DATABASE_ID, USERS_COLLECTION_ID } from '../utils/appwriteConfig';
@@ -6,6 +5,7 @@ import { toast } from '@/hooks/use-toast';
 
 interface User {
   $id: string;
+  userId: string;
   name: string;
   email: string;
   role: string;
@@ -39,6 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (userDetails) {
           setUser({
             $id: userDetails.$id,
+            userId: userDetails.userId,
             name: userDetails.name,
             email: userDetails.email,
             role: userDetails.role,
