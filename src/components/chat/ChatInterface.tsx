@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,13 +12,15 @@ import {
 } from '@/components/ui/select';
 import { sendMessage, getMessages, databases, DATABASE_ID, USERS_COLLECTION_ID } from '@/utils/appwriteConfig';
 import { toast } from '@/hooks/use-toast';
-import { ID, Query } from 'appwrite';
+import { ID, Query, Models } from 'appwrite';
 
 interface User {
   $id: string;
   userId: string;
   name: string;
   email: string;
+  role?: string;
+  aiTokensRemaining?: number;
 }
 
 interface Message {
@@ -32,7 +33,7 @@ interface Message {
 }
 
 interface ChatInterfaceProps {
-  currentUser: User | null;
+  currentUser: User;
 }
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentUser }) => {
@@ -53,11 +54,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentUser }) => {
           []
         );
 
-        // Filter out current user
-        const otherUsers = response.documents.filter(
-          (user: any) => user.userId !== currentUser?.userId
-        );
-        setUsers(otherUsers as User[]);
+        // Filter out current user and properly cast the documents to User type
+        const otherUsers = response.documents
+          .filter((user: Models.Document) => user.userId !== currentUser.userId)
+          .map((user: Models.Document) => user as unknown as User);
+        
+        setUsers(otherUsers);
       } catch (error) {
         console.error('Error fetching users:', error);
         toast({
@@ -116,11 +118,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentUser }) => {
       const allMessages = [
         ...sentMessages.documents,
         ...receivedMessages.documents
-      ].sort((a: any, b: any) => {
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-      });
+      ]
+        .sort((a: Models.Document, b: Models.Document) => {
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        })
+        .map((msg: Models.Document) => msg as unknown as Message);
 
-      setMessages(allMessages as Message[]);
+      setMessages(allMessages);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching messages:', error);

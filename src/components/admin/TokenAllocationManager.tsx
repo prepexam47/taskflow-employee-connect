@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -15,6 +14,7 @@ import { databases, DATABASE_ID, USERS_COLLECTION_ID } from '@/utils/appwriteCon
 import { updateUserTokens } from '@/utils/aiService';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { Models } from 'appwrite';
 
 interface User {
   $id: string;
@@ -41,10 +41,10 @@ const TokenAllocationManager = () => {
         []
       );
       
-      // Filter out current admin user
-      const filteredUsers = response.documents.filter(
-        (u: any) => u.userId !== currentUser?.$id && u.role !== 'admin'
-      ) as User[];
+      // Filter out current admin user and properly cast to User type
+      const filteredUsers = response.documents
+        .filter((u: Models.Document) => u.userId !== currentUser?.userId && u.role !== 'admin')
+        .map((u: Models.Document) => u as unknown as User);
       
       setUsers(filteredUsers);
     } catch (error) {

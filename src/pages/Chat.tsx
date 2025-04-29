@@ -16,7 +16,7 @@ const Chat = () => {
           <CardTitle>Messages</CardTitle>
         </CardHeader>
         <CardContent>
-          <ChatInterface currentUser={user} />
+          {user && <ChatInterface currentUser={user} />}
         </CardContent>
       </Card>
     </div>

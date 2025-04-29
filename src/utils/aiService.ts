@@ -1,6 +1,5 @@
-
 import { databases, DATABASE_ID, USERS_COLLECTION_ID } from './appwriteConfig';
-import { Query } from 'appwrite';
+import { Query, ID } from 'appwrite';
 import { toast } from '@/hooks/use-toast';
 
 // Define configuration for AI services
