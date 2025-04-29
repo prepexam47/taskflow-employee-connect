@@ -13,6 +13,9 @@ export const account = new Account(client);
 export const databases = new Databases(client);
 export const storage = new Storage(client);
 
+// Export Appwrite utilities for use in services
+export { ID, Query, Models };
+
 // Database and collection IDs
 export const DATABASE_ID = 'taskflow-database';
 export const USERS_COLLECTION_ID = 'users';
