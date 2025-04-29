@@ -12,6 +12,7 @@ import Chat from "./pages/Chat";
 import Attendance from "./pages/Attendance";
 import NotFound from "./pages/NotFound";
 import { useAuth } from "./frontend/context/AuthContext";
+import Index from "./pages/Index";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
@@ -30,6 +31,7 @@ const App = () => (
     <Toaster />
     <Sonner />
     <Routes>
+      <Route path="/" element={<Index />} />
       <Route path="/login" element={<Login />} />
       
       <Route
