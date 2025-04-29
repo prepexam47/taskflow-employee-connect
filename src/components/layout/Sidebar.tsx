@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/frontend/context/AuthContext';
 import { Calendar, MessageSquare, User, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ROLE_ADMIN } from '@/utils/appwriteConfig';
