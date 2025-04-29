@@ -11,33 +11,67 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { useAuth } from '@/context/AuthContext';
-import { sendMessage, getMessages } from '@/utils/appwriteConfig';
+import { sendMessage, getMessages, databases, DATABASE_ID, USERS_COLLECTION_ID } from '@/utils/appwriteConfig';
 import { toast } from '@/hooks/use-toast';
+import { ID, Query } from 'appwrite';
 
 interface User {
   $id: string;
+  userId: string;
   name: string;
+  email: string;
 }
 
-const ChatInterface = () => {
-  const { user } = useAuth();
+interface Message {
+  $id: string;
+  senderId: string;
+  receiverId: string;
+  content: string;
+  readStatus: boolean;
+  createdAt: string;
+}
+
+interface ChatInterfaceProps {
+  currentUser: User | null;
+}
+
+const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentUser }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<string>('');
   const [messageInput, setMessageInput] = useState('');
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // In a real app, you would fetch real users from your database
+  // Fetch users from Appwrite
   useEffect(() => {
-    // Mock users data
-    setUsers([
-      { $id: '1', name: 'John Doe' },
-      { $id: '2', name: 'Jane Smith' },
-      { $id: '3', name: 'Alex Johnson' },
-    ]);
-  }, []);
+    const fetchUsers = async () => {
+      try {
+        const response = await databases.listDocuments(
+          DATABASE_ID,
+          USERS_COLLECTION_ID,
+          []
+        );
+
+        // Filter out current user
+        const otherUsers = response.documents.filter(
+          (user: any) => user.userId !== currentUser?.userId
+        );
+        setUsers(otherUsers as User[]);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch users",
+          variant: "destructive",
+        });
+      }
+    };
+
+    if (currentUser) {
+      fetchUsers();
+    }
+  }, [currentUser]);
 
   useEffect(() => {
     if (selectedUser) {
@@ -54,22 +88,40 @@ const ChatInterface = () => {
   };
 
   const fetchMessages = async () => {
-    if (!user) return;
+    if (!currentUser || !selectedUser) return;
     
     setLoading(true);
     try {
-      // In a real app, this would fetch real messages
-      // For this demo, we'll set mock messages after a delay
-      setTimeout(() => {
-        const mockMessages = [
-          { senderId: user.$id, receiverId: selectedUser, content: 'Hello there!', createdAt: new Date(Date.now() - 86400000).toISOString() },
-          { senderId: selectedUser, receiverId: user.$id, content: 'Hi! How can I help you?', createdAt: new Date(Date.now() - 82800000).toISOString() },
-          { senderId: user.$id, receiverId: selectedUser, content: 'I wanted to discuss the project timeline.', createdAt: new Date(Date.now() - 79200000).toISOString() },
-          { senderId: selectedUser, receiverId: user.$id, content: 'Sure, I\'m available. What specifically did you want to discuss?', createdAt: new Date(Date.now() - 75600000).toISOString() },
-        ];
-        setMessages(mockMessages);
-        setLoading(false);
-      }, 500);
+      // In a real app, we would get messages between two users
+      // Here we're using a simplified approach
+      const sentMessages = await databases.listDocuments(
+        DATABASE_ID,
+        'messages',
+        [
+          Query.equal('senderId', currentUser.userId),
+          Query.equal('receiverId', selectedUser)
+        ]
+      );
+
+      const receivedMessages = await databases.listDocuments(
+        DATABASE_ID,
+        'messages',
+        [
+          Query.equal('senderId', selectedUser),
+          Query.equal('receiverId', currentUser.userId)
+        ]
+      );
+
+      // Combine and sort messages by timestamp
+      const allMessages = [
+        ...sentMessages.documents,
+        ...receivedMessages.documents
+      ].sort((a: any, b: any) => {
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      });
+
+      setMessages(allMessages as Message[]);
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching messages:', error);
       toast({
@@ -82,31 +134,26 @@ const ChatInterface = () => {
   };
 
   const handleSendMessage = async () => {
-    if (!messageInput.trim() || !selectedUser || !user) return;
+    if (!messageInput.trim() || !selectedUser || !currentUser) return;
 
     try {
-      // In a real app, this would send a real message to your backend
-      // For this demo, we'll just add it to the local state
-      const newMessage = {
-        senderId: user.$id,
-        receiverId: selectedUser,
-        content: messageInput,
-        createdAt: new Date().toISOString(),
-      };
-      
-      setMessages(prev => [...prev, newMessage]);
-      setMessageInput('');
-
-      // Simulate response after a delay
-      setTimeout(() => {
-        const responseMessage = {
-          senderId: selectedUser,
-          receiverId: user.$id,
-          content: 'Thanks for your message. I\'ll get back to you soon!',
+      // Create message document
+      const newMessage = await databases.createDocument(
+        DATABASE_ID,
+        'messages',
+        ID.unique(),
+        {
+          senderId: currentUser.userId,
+          receiverId: selectedUser,
+          content: messageInput,
+          readStatus: false,
           createdAt: new Date().toISOString(),
-        };
-        setMessages(prev => [...prev, responseMessage]);
-      }, 2000);
+        }
+      );
+      
+      // Add to local state
+      setMessages(prev => [...prev, newMessage as unknown as Message]);
+      setMessageInput('');
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
@@ -126,6 +173,18 @@ const ChatInterface = () => {
     }
   };
 
+  // Get user name by ID
+  const getUserName = (userId: string) => {
+    const user = users.find(u => u.userId === userId);
+    return user ? user.name : 'Unknown User';
+  };
+
+  // Get first letter of name for avatar
+  const getInitial = (userId: string) => {
+    const name = getUserName(userId);
+    return name.charAt(0).toUpperCase();
+  };
+
   return (
     <div className="flex flex-col h-[70vh]">
       <div className="mb-4">
@@ -135,7 +194,7 @@ const ChatInterface = () => {
           </SelectTrigger>
           <SelectContent>
             {users.map(u => (
-              <SelectItem key={u.$id} value={u.$id}>{u.name}</SelectItem>
+              <SelectItem key={u.userId} value={u.userId}>{u.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -152,14 +211,14 @@ const ChatInterface = () => {
               messages.map((message, index) => (
                 <div 
                   key={index} 
-                  className={`flex mb-4 ${message.senderId === user?.$id ? 'justify-end' : 'justify-start'}`}
+                  className={`flex mb-4 ${message.senderId === currentUser?.userId ? 'justify-end' : 'justify-start'}`}
                 >
-                  <Card className={`max-w-[75%] ${message.senderId === user?.$id ? 'bg-primary text-white' : 'bg-white'}`}>
+                  <Card className={`max-w-[75%] ${message.senderId === currentUser?.userId ? 'bg-primary text-white' : 'bg-white'}`}>
                     <CardContent className="p-3">
                       <div className="flex items-start gap-3">
-                        {message.senderId !== user?.$id && (
+                        {message.senderId !== currentUser?.userId && (
                           <Avatar className="h-8 w-8 bg-secondary">
-                            <div className="text-xs font-bold">{users.find(u => u.$id === message.senderId)?.name.charAt(0) || 'U'}</div>
+                            <div className="text-xs font-bold">{getInitial(message.senderId)}</div>
                           </Avatar>
                         )}
                         <div>

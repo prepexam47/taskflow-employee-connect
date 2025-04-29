@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AIAssistant from '@/components/ai/AIAssistant';
+import TokenAllocationManager from '@/components/admin/TokenAllocationManager';
 import { useAuth } from '@/context/AuthContext';
 import { ROLE_ADMIN } from '@/utils/appwriteConfig';
 
@@ -27,6 +28,12 @@ const AIAssistantPage = () => {
         </Card>
       </div>
 
+      {isAdmin && (
+        <div className="mt-8">
+          <TokenAllocationManager />
+        </div>
+      )}
+
       <div className="mt-8">
         <Card>
           <CardHeader>
@@ -50,7 +57,7 @@ const AIAssistantPage = () => {
                 <h4 className="font-medium mb-2">Token System:</h4>
                 <p className="text-sm">
                   {isAdmin 
-                    ? "As an administrator, you have unlimited access to the AI assistant." 
+                    ? "As an administrator, you have unlimited access to the AI assistant and can assign token allocations to employees." 
                     : `Each employee is allocated a daily token limit for AI usage. You currently have ${user?.aiTokensRemaining === -1 ? 'unlimited' : user?.aiTokensRemaining} tokens remaining.`
                   }
                 </p>

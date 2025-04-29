@@ -1,12 +1,12 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar } from '@/components/ui/avatar';
-import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/context/AuthContext';
-import { recordAIUsage, ROLE_ADMIN } from '@/utils/appwriteConfig';
+import { ROLE_ADMIN } from '@/utils/appwriteConfig';
+import { sendAIRequest } from '@/utils/aiService';
 import { toast } from '@/hooks/use-toast';
 
 const AIAssistant = () => {
@@ -28,7 +28,7 @@ const AIAssistant = () => {
   };
 
   const handleSendMessage = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || !user) return;
 
     // Add user message
     const userMessage = { role: 'user', content: input };
@@ -37,40 +37,27 @@ const AIAssistant = () => {
     setLoading(true);
 
     try {
-      // In a real app, check tokens and call the AI service
-      // For this demo, we'll simulate token usage and response
-      if (user) {
-        const estimatedTokens = Math.ceil(input.length / 4);
-        const tokenCheck = await recordAIUsage(user.$id, estimatedTokens);
-
-        if (!tokenCheck.success) {
-          toast({
-            title: "Token Limit Reached",
-            description: "You don't have enough tokens left for this request",
-            variant: "destructive",
-          });
-          setLoading(false);
-          return;
-        }
-
-        // Simulate AI response
-        setTimeout(() => {
-          // Generate a mock response based on the input
-          let aiResponse = '';
-          if (input.toLowerCase().includes('task')) {
-            aiResponse = "I can help you manage tasks! You can create, update, or view your tasks through the Tasks section.";
-          } else if (input.toLowerCase().includes('deadline') || input.toLowerCase().includes('due date')) {
-            aiResponse = "Need help with deadlines? I recommend setting clear due dates when creating tasks and using the priority field to highlight urgency.";
-          } else if (input.toLowerCase().includes('report') || input.toLowerCase().includes('summary')) {
-            aiResponse = "I can provide task summaries and reports! In a real implementation, I could generate detailed performance analytics and task completion statistics.";
-          } else {
-            aiResponse = "Thank you for your query. I'm here to help with task management, deadlines, workflows, and providing insights on productivity. How else can I assist you today?";
-          }
-          
-          setMessages(prev => [...prev, { role: 'system', content: aiResponse }]);
-          setLoading(false);
-        }, 1500);
+      // Estimate token usage (simple estimate based on input length)
+      const estimatedTokens = Math.ceil(input.length / 4);
+      
+      // Send request to AI service
+      const aiResponse = await sendAIRequest(user.$id, input, estimatedTokens);
+      
+      if (!aiResponse.success) {
+        toast({
+          title: "AI Error",
+          description: aiResponse.error || "Failed to get AI response",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
       }
+      
+      // Add AI response to messages
+      setMessages(prev => [
+        ...prev, 
+        { role: 'system', content: aiResponse.response || "Sorry, I couldn't process your request." }
+      ]);
     } catch (error) {
       console.error('Error with AI request:', error);
       toast({
@@ -78,6 +65,7 @@ const AIAssistant = () => {
         description: "There was a problem processing your request",
         variant: "destructive",
       });
+    } finally {
       setLoading(false);
     }
   };
@@ -98,7 +86,7 @@ const AIAssistant = () => {
                       <div className="text-xs font-bold">AI</div>
                     </Avatar>
                   )}
-                  <p className="text-sm">{message.content}</p>
+                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                 </div>
               </CardContent>
             </Card>
