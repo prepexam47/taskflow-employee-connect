@@ -1,5 +1,5 @@
 
-import { Account, Client, Databases, Storage, ID, Query, Models } from 'appwrite';
+import { Account, Client, Databases, Storage, ID, Query } from 'appwrite';
 
 // Initialize Appwrite client
 const client = new Client();
@@ -14,7 +14,8 @@ export const databases = new Databases(client);
 export const storage = new Storage(client);
 
 // Export Appwrite utilities for use in services
-export { ID, Query, Models };
+export { ID, Query };
+export type { Models } from 'appwrite';
 
 // Database and collection IDs
 export const DATABASE_ID = 'taskflow-database';
