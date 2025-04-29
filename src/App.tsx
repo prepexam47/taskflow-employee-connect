@@ -14,9 +14,6 @@ import Chat from "./pages/Chat";
 import Attendance from "./pages/Attendance";
 import NotFound from "./pages/NotFound";
 
-// Install Appwrite
-<lov-add-dependency>appwrite@13.0.0</lov-add-dependency>
-
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
