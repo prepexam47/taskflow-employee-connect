@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AIAssistant from '@/components/ai/AIAssistant';
 import TokenAllocationManager from '@/components/admin/TokenAllocationManager';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/frontend/context/AuthContext';
 import { ROLE_ADMIN } from '@/utils/appwriteConfig';
 
 const AIAssistantPage = () => {

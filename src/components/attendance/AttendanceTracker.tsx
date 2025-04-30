@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { format, parseISO } from 'date-fns';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/frontend/context/AuthContext';
 import { updateAttendance, getAttendance, ROLE_ADMIN } from '@/utils/appwriteConfig';
 import { toast } from '@/hooks/use-toast';
 

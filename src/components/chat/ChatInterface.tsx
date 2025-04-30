@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/select';
 import { sendMessage, getMessages, databases, DATABASE_ID, USERS_COLLECTION_ID } from '@/utils/appwriteConfig';
 import { toast } from '@/hooks/use-toast';
-import { ID, Query, Models } from 'appwrite';
+import { ID, Query } from 'appwrite';
 
 interface User {
   $id: string;

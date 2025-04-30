@@ -4,7 +4,7 @@ import TaskList from '@/components/tasks/TaskList';
 import TaskForm from '@/components/tasks/TaskForm';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/frontend/context/AuthContext';
 import { ROLE_ADMIN } from '@/utils/appwriteConfig';
 
 const Tasks = () => {
