@@ -42,6 +42,7 @@ const App = () => (
           </ProtectedRoute>
         }
       >
+        <Route index element={<Navigate to="/dashboard" />} />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="tasks" element={<Tasks />} />
         <Route path="ai" element={<AIAssistant />} />
