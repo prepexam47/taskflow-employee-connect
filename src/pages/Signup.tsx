@@ -11,7 +11,7 @@ const Signup = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-3xl font-bold">Sign Up</CardTitle>
-          <CardDescription>Create a new TaskFlow account</CardDescription>
+          <CardDescription>Create a new TaskFlow employee account</CardDescription>
         </CardHeader>
         <CardContent>
           <SignupForm />
@@ -23,6 +23,9 @@ const Signup = () => {
               <Link to="/login">Login here</Link>
             </Button>
           </div>
+          <p className="text-center text-sm text-muted-foreground">
+            TaskFlow helps you manage tasks, track attendance, and connect with your team.
+          </p>
         </CardFooter>
       </Card>
     </div>

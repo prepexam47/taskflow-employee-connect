@@ -13,7 +13,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useNavigate } from 'react-router-dom';
 import { createUser } from '@/backend/services/userService';
 import { toast } from '@/hooks/use-toast';
@@ -31,9 +30,6 @@ const formSchema = z.object({
   confirmPassword: z.string().min(6, {
     message: "Confirm password must be at least 6 characters.",
   }),
-  role: z.enum(["employee", "admin"], {
-    required_error: "Please select a role.",
-  }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -50,14 +46,14 @@ const SignupForm = () => {
       email: "",
       password: "",
       confirmPassword: "",
-      role: "employee",
     },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsLoading(true);
-      await createUser(values.email, values.password, values.name, values.role);
+      // Always set role as "employee" since only admins can assign admin roles
+      await createUser(values.email, values.password, values.name, "employee");
       
       toast({
         title: "Account created",
@@ -149,28 +145,6 @@ const SignupForm = () => {
                   autoComplete="new-password"
                 />
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="role"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Account Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select account type" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="employee">Employee</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                </SelectContent>
-              </Select>
               <FormMessage />
             </FormItem>
           )}
