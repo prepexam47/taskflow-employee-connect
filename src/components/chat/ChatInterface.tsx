@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,6 +37,11 @@ interface ChatInterfaceProps {
   currentUser: User;
 }
 
+interface AppwriteDocument {
+  $id: string;
+  [key: string]: any;
+}
+
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentUser }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<string>('');
@@ -56,8 +62,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentUser }) => {
 
         // Filter out current user and properly cast the documents to User type
         const otherUsers = response.documents
-          .filter((user: Models.Document) => user.userId !== currentUser.userId)
-          .map((user: Models.Document) => user as unknown as User);
+          .filter((user: AppwriteDocument) => user.userId !== currentUser.userId)
+          .map((user: AppwriteDocument) => user as unknown as User);
         
         setUsers(otherUsers);
       } catch (error) {
@@ -119,10 +125,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentUser }) => {
         ...sentMessages.documents,
         ...receivedMessages.documents
       ]
-        .sort((a: Models.Document, b: Models.Document) => {
+        .sort((a: AppwriteDocument, b: AppwriteDocument) => {
           return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
         })
-        .map((msg: Models.Document) => msg as unknown as Message);
+        .map((msg: AppwriteDocument) => msg as unknown as Message);
 
       setMessages(allMessages);
       setLoading(false);

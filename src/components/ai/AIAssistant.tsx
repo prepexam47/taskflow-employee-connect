@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar } from '@/components/ui/avatar';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/frontend/context/AuthContext';
 import { ROLE_ADMIN } from '@/utils/appwriteConfig';
 import { sendAIRequest } from '@/utils/aiService';
 import { toast } from '@/hooks/use-toast';
