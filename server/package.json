@@ -1,0 +1,20 @@
+
+{
+  "name": "taskflow-server",
+  "version": "1.0.0",
+  "description": "Backend server for TaskFlow application",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "client": "cd .. && npm run dev",
+    "dev:all": "concurrently \"npm run dev\" \"npm run client\""
+  },
+  "keywords": [
+    "express",
+    "appwrite",
+    "node"
+  ],
+  "author": "",
+  "license": "ISC"
+}
